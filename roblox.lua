@@ -30,8 +30,8 @@ local function addCorner(obj, r)
 end
 
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 320, 0, 370)
-main.Position = UDim2.new(0.5, -160, 0.5, -185)
+main.Size = UDim2.new(0, 280, 0, 320)
+main.Position = UDim2.new(0.5, -140, 0.5, -160)
 main.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
 main.BackgroundTransparency = 0.05
 main.BorderSizePixel = 0
@@ -40,8 +40,8 @@ main.Draggable = true
 addCorner(main, 12)
 
 local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1, -50, 0, 40)
-title.Position = UDim2.new(0, 15, 0, 0)
+title.Size = UDim2.new(1, -50, 0, 35)
+title.Position = UDim2.new(0, 12, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "ERRANT"
 title.TextColor3 = Color3.fromRGB(255, 50, 50)
@@ -49,8 +49,8 @@ title.TextScaled = true
 title.Font = Enum.Font.GothamBold
 
 local minimizeBtn = Instance.new("TextButton", main)
-minimizeBtn.Size = UDim2.new(0, 30, 0, 30)
-minimizeBtn.Position = UDim2.new(1, -38, 0, 5)
+minimizeBtn.Size = UDim2.new(0, 28, 0, 28)
+minimizeBtn.Position = UDim2.new(1, -34, 0, 4)
 minimizeBtn.BackgroundTransparency = 1
 minimizeBtn.Text = "−"
 minimizeBtn.TextColor3 = Color3.new(1, 1, 1)
@@ -65,10 +65,10 @@ minimizeBtn.MouseButton1Click:Connect(function()
     minimized = not minimized
     
     if minimized then
-        main.Size = UDim2.new(0, 320, 0, 40)
+        main.Size = UDim2.new(0, 280, 0, 35)
         minimizeBtn.Text = "+"
     else
-        main.Size = UDim2.new(0, 320, 0, 370)
+        main.Size = UDim2.new(0, 280, 0, 320)
         minimizeBtn.Text = "−"
     end
 
@@ -89,8 +89,8 @@ local names = {"GOD MODE", "SPEEDHACK", "NOCLIP", "INFINITY JUMP", "ESP"}
 
 for i, name in ipairs(names) do
     local btn = Instance.new("TextButton", main)
-    btn.Size = UDim2.new(1, -20, 0, 38)
-    btn.Position = UDim2.new(0, 10, 0, 55 + (i-1)*45)
+    btn.Size = UDim2.new(1, -16, 0, 32)
+    btn.Position = UDim2.new(0, 8, 0, 45 + (i-1)*39)
     btn.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     btn.Text = name
     btn.TextColor3 = Color3.new(1, 1, 1)
@@ -114,8 +114,8 @@ for i, name in ipairs(names) do
 end
 
 local speedLabel = Instance.new("TextLabel", main)
-speedLabel.Size = UDim2.new(1, -20, 0, 25)
-speedLabel.Position = UDim2.new(0, 10, 0, 290)
+speedLabel.Size = UDim2.new(1, -16, 0, 22)
+speedLabel.Position = UDim2.new(0, 8, 0, 245)
 speedLabel.BackgroundTransparency = 1
 speedLabel.Text = "Speed: " .. SpeedValue
 speedLabel.TextColor3 = Color3.new(1, 1, 1)
@@ -123,8 +123,8 @@ speedLabel.TextScaled = true
 speedLabel.Font = Enum.Font.GothamSemibold
 
 local speedSlider = Instance.new("TextButton", main)
-speedSlider.Size = UDim2.new(1, -20, 0, 28)
-speedSlider.Position = UDim2.new(0, 10, 0, 320)
+speedSlider.Size = UDim2.new(1, -16, 0, 24)
+speedSlider.Position = UDim2.new(0, 8, 0, 270)
 speedSlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 speedSlider.Text = ""
 speedSlider.BorderSizePixel = 0
