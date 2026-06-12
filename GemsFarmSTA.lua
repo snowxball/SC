@@ -1,13 +1,5 @@
--- Made by TheAnonymous in RScript / Theultimateuser in Scriptblox
-
--- Feel free to adjust
--- The ultimate solo gem farming (Slapped some stuff with AI so no hate :) )
 -- Remember to put this into auto-execution folder or smth, each run is completed in around 25-35 seconds so 2-2.4 gems/min
--- This is FREE and KEYLESS
--- You shall not copy this code and add key system on top of it for pure greediness. Don't be like Racky in Rscript where he tries to make money off from mine without adding new stuff LOL (seriously, add some unique stuff that makes it worth the trouble)
--- You can modify it and give credits, it's fine :PP
-
--- The script works like this: finds two fuels to upgrade the generator -> go fix the closest power plant (main way to get gem)
+-- The script works like this: Finds two fuels to upgrade the generator -> go fix the closest power plant (main way to get gem)
 print("Loading")
 print("[ UPDATE ] Changed the movement function so it's burst speed so it should be faster than original one")
 print("Tell me in Rscript or Scriptblox if there are any bugs")
