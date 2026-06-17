@@ -1,5 +1,3 @@
--- Remember to put this into auto-execution folder or smth, each run is completed in around 25-35 seconds so 2-2.4 gems/min
--- The script works like this: Finds two fuels to upgrade the generator -> go fix the closest power plant (main way to get gem)
 print("Loading")
 print("[ UPDATE ] Changed the movement function so it's burst speed so it should be faster than original one")
 print("Tell me in Rscript or Scriptblox if there are any bugs")
@@ -367,20 +365,20 @@ local function runPipeline()
         print("Free and Keyless, script is in https://pastebin.com/V0wHqZe4")
     end
 end
-
+ 
 -- [ Background Tasks ]
-
+ 
 -- Checking if there is mod already joined
 if #Players:GetPlayers() > 1 then
     evacuateServer("Pre-existing player DETECTED!")
 end
-
+ 
 Players.PlayerAdded:Connect(function(newPlayer)
     if newPlayer ~= LocalPlayer then
         evacuateServer("Player entry detected (" .. newPlayer.Name .. "). Executing immediate escape.")
     end
 end)
-
+ 
 -- If a run somehow fails (either finding fuel function broke or smth), it will do a fresh new run
 task.spawn(function()
     task.wait(60.0) -- Hard 1-minute safety timeout limit
