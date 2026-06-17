@@ -1,6 +1,5 @@
 print("Loading")
-print("[ UPDATE ] Changed the movement function so it's burst speed so it should be faster than original one")
-print("Tell me in Rscript or Scriptblox if there are any bugs")
+
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
