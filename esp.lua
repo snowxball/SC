@@ -146,10 +146,6 @@ local opened = false
 local colors = {
 	{"Blue", Color3.fromRGB(0,120,255)},
 	{"Red", Color3.fromRGB(255,70,70)},
-	{"Green", Color3.fromRGB(0,255,120)},
-	{"Yellow", Color3.fromRGB(255,220,0)},
-	{"Purple", Color3.fromRGB(170,0,255)},
-	{"White", Color3.fromRGB(255,255,255)}
 }
 
 local function updateHighlights()
