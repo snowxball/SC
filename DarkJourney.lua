@@ -1,7 +1,3 @@
--- =============================================
--- DABUX CLUSTER FARM - VERSI KECIL & SIMPEL
--- =============================================
-
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local CoreGui = game:GetService("CoreGui")
@@ -21,9 +17,8 @@ gui.Name = "DabuxMiniGUI"
 gui.Parent = CoreGui
 gui.ResetOnSpawn = false
 
--- Main Frame (Ukuran lebih kecil)
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 260, 0, 180)  -- Setengah ukuran
+main.Size = UDim2.new(0, 260, 0, 180)
 main.Position = UDim2.new(0.5, -130, 0.5, -90)
 main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 main.BorderSizePixel = 0
@@ -34,7 +29,7 @@ Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 40)
 title.BackgroundTransparency = 1
-title.Text = "Errant Farm DABUX"
+title.Text = "Errant - Farm DABUX"
 title.TextColor3 = Color3.fromRGB(255, 200, 0)
 title.TextScaled = true
 title.Font = Enum.Font.GothamBold
@@ -52,7 +47,7 @@ status.Font = Enum.Font.Gotham
 local startBtn = Instance.new("TextButton", main)
 startBtn.Size = UDim2.new(0.9, 0, 0, 45)
 startBtn.Position = UDim2.new(0.05, 0, 0, 80)
-startBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+startBtn.BackgroundColor3 = Color3.fromRGB(72, 61, 139)
 startBtn.Text = "TELEPORT TO BEST CLUSTER"
 startBtn.TextColor3 = Color3.new(1,1,1)
 startBtn.TextScaled = true
@@ -63,7 +58,7 @@ Instance.new("UICorner", startBtn).CornerRadius = UDim.new(0, 8)
 local nextBtn = Instance.new("TextButton", main)
 nextBtn.Size = UDim2.new(0.9, 0, 0, 40)
 nextBtn.Position = UDim2.new(0.05, 0, 0, 130)
-nextBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
+nextBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 112)
 nextBtn.Text = "NEXT CLUSTER"
 nextBtn.TextColor3 = Color3.new(1,1,1)
 nextBtn.TextScaled = true
