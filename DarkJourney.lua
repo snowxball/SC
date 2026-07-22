@@ -1,5 +1,5 @@
 -- =============================================
--- DABUX CLUSTER + TELEPORT PLAYER
+-- DABUX CLUSTER + TELEPORT PLAYER | Errant's Script Test
 -- =============================================
 
 local Players = game:GetService("Players")
