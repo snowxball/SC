@@ -122,4 +122,3 @@ nextBtn.MouseButton1Click:Connect(function()
 end)
 
 print("Dabux Mini GUI Loaded")
-print("Gunakan tombol 'NEXT CLUSTER' untuk pindah")
