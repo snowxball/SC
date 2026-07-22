@@ -1,5 +1,5 @@
 -- =============================================
--- DABUX CLUSTER FARM + GUI
+-- DABUX CLUSTER FARM - VERSI KECIL & SIMPEL
 -- =============================================
 
 local Players = game:GetService("Players")
@@ -7,70 +7,68 @@ local Workspace = game:GetService("Workspace")
 local CoreGui = game:GetService("CoreGui")
 
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local root = character:WaitForChild("HumanoidRootPart")
+local root = player.Character and player.Character:WaitForChild("HumanoidRootPart")
 
-local AUTO_FARM = false
-local connection = nil
+local currentClusterIndex = 1
 
 -- Hapus GUI lama
-if CoreGui:FindFirstChild("DabuxClusterGUI") then
-    CoreGui.DabuxClusterGUI:Destroy()
+if CoreGui:FindFirstChild("DabuxMiniGUI") then
+    CoreGui.DabuxMiniGUI:Destroy()
 end
 
 local gui = Instance.new("ScreenGui")
-gui.Name = "DabuxClusterGUI"
+gui.Name = "DabuxMiniGUI"
 gui.Parent = CoreGui
 gui.ResetOnSpawn = false
 
--- Main Frame
+-- Main Frame (Ukuran lebih kecil)
 local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 340, 0, 260)
-main.Position = UDim2.new(0.5, -170, 0.5, -130)
+main.Size = UDim2.new(0, 260, 0, 180)  -- Setengah ukuran
+main.Position = UDim2.new(0.5, -130, 0.5, -90)
 main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 main.BorderSizePixel = 0
 main.Active = true
 main.Draggable = true
-Instance.new("UICorner", main).CornerRadius = UDim.new(0, 12)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
 local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1, 0, 0, 50)
+title.Size = UDim2.new(1, 0, 0, 40)
 title.BackgroundTransparency = 1
-title.Text = "DABUX CLUSTER FARM"
+title.Text = "Errant Farm DABUX"
 title.TextColor3 = Color3.fromRGB(255, 200, 0)
 title.TextScaled = true
 title.Font = Enum.Font.GothamBold
 
 local status = Instance.new("TextLabel", main)
-status.Size = UDim2.new(1, -20, 0, 35)
-status.Position = UDim2.new(0, 10, 0, 55)
+status.Size = UDim2.new(1, -20, 0, 30)
+status.Position = UDim2.new(0, 10, 0, 45)
 status.BackgroundTransparency = 1
-status.Text = "Status: Ready"
+status.Text = "Ready"
 status.TextColor3 = Color3.fromRGB(150, 150, 150)
 status.TextScaled = true
 status.Font = Enum.Font.Gotham
 
--- Toggle Button
-local toggleBtn = Instance.new("TextButton", main)
-toggleBtn.Size = UDim2.new(0.9, 0, 0, 55)
-toggleBtn.Position = UDim2.new(0.05, 0, 0, 100)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-toggleBtn.Text = "START FARM"
-toggleBtn.TextColor3 = Color3.new(1,1,1)
-toggleBtn.TextScaled = true
-toggleBtn.Font = Enum.Font.GothamBold
-Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 10)
+-- Tombol Start Farm
+local startBtn = Instance.new("TextButton", main)
+startBtn.Size = UDim2.new(0.9, 0, 0, 45)
+startBtn.Position = UDim2.new(0.05, 0, 0, 80)
+startBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+startBtn.Text = "TELEPORT TO BEST CLUSTER"
+startBtn.TextColor3 = Color3.new(1,1,1)
+startBtn.TextScaled = true
+startBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", startBtn).CornerRadius = UDim.new(0, 8)
 
--- Restart Button
-local restartBtn = Instance.new("TextButton", main)
-restartBtn.Size = UDim2.new(0.9, 0, 0, 45)
-restartBtn.Position = UDim2.new(0.05, 0, 0, 165)
-restartBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 50)
-restartBtn.Text = "RESTART SCRIPT"
-restartBtn.TextColor3 = Color3.new(1,1,1)
-restartBtn.TextScaled = true
-restartBtn.Font = Enum.Font.GothamBold
-Instance.new("UICorner", restartBtn).CornerRadius = UDim.new(0, 10)
+-- Tombol Next Cluster
+local nextBtn = Instance.new("TextButton", main)
+nextBtn.Size = UDim2.new(0.9, 0, 0, 40)
+nextBtn.Position = UDim2.new(0.05, 0, 0, 130)
+nextBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
+nextBtn.Text = "NEXT CLUSTER"
+nextBtn.TextColor3 = Color3.new(1,1,1)
+nextBtn.TextScaled = true
+nextBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", nextBtn).CornerRadius = UDim.new(0, 8)
 
 -- ==================== FUNCTION ====================
 local function getRankedClusters()
@@ -100,58 +98,33 @@ local function getRankedClusters()
     return clusters
 end
 
-local function runFarm()
-    if not root then 
-        root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    end
-    if not root then return end
-
-    local rankedList = getRankedClusters()
-
-    if #rankedList >= 1 then
-        local first = rankedList[1]
-        print("Teleporting to #1 Cluster (" .. first.count .. " Dabux)")
-        root.CFrame = first.cf * CFrame.new(0, 4, 0)
-
-        task.wait(40)
-
-        rankedList = getRankedClusters()
-        if #rankedList >= 2 then
-            local second = rankedList[2]
-            print("Moving to #2 Cluster (" .. second.count .. " Dabux)")
-            root.CFrame = second.cf * CFrame.new(0, 4, 0)
-            print("✅ Finished moving to second cluster.")
+local function teleportToCluster(index)
+    local clusters = getRankedClusters()
+    if #clusters >= index then
+        local cluster = clusters[index]
+        if root then
+            root.CFrame = cluster.cf * CFrame.new(0, 4, 0)
+            status.Text = "Cluster #" .. index .. " (" .. cluster.count .. " Dabux)"
+            status.TextColor3 = Color3.fromRGB(0, 255, 120)
+            print("Teleported to Cluster #" .. index)
         end
     else
-        print("No Dabux found.")
+        status.Text = "No more clusters"
+        status.TextColor3 = Color3.fromRGB(255, 80, 80)
     end
 end
 
--- Toggle Button
-toggleBtn.MouseButton1Click:Connect(function()
-    AUTO_FARM = not AUTO_FARM
-    
-    if AUTO_FARM then
-        status.Text = "Status: FARM RUNNING"
-        status.TextColor3 = Color3.fromRGB(0, 255, 120)
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 100)
-        toggleBtn.Text = "STOP FARM"
-        runFarm()
-    else
-        status.Text = "Status: Stopped"
-        status.TextColor3 = Color3.fromRGB(255, 80, 80)
-        toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-        toggleBtn.Text = "START FARM"
-    end
+-- Tombol Teleport ke Cluster Terbaik
+startBtn.MouseButton1Click:Connect(function()
+    currentClusterIndex = 1
+    teleportToCluster(currentClusterIndex)
 end)
 
--- Restart Button
-restartBtn.MouseButton1Click:Connect(function()
-    print("Restarting Dabux Farm Script...")
-    gui:Destroy()
-    loadstring(game:HttpGet("loadstring(game:HttpGet("https://raw.githubusercontent.com/snowxball/SC/main/DarkJourney.lua"))()"))() -- Ganti jika perlu
-    -- Atau reload script manual
+-- Tombol Next Cluster
+nextBtn.MouseButton1Click:Connect(function()
+    currentClusterIndex = currentClusterIndex + 1
+    teleportToCluster(currentClusterIndex)
 end)
 
-print("Dabux Cluster Farm GUI Loaded")
-print("Tekan START FARM untuk menjalankan")
+print("Dabux Mini GUI Loaded")
+print("Gunakan tombol 'NEXT CLUSTER' untuk pindah")
