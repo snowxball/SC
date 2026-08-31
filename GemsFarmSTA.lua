@@ -297,6 +297,38 @@ local function runPipeline()
         FuelTeleport(humanoidRootPart, fuelTwo)
         task.wait(0.5)
     end
+
+	local fuelThree = getClosestFuelPosition(humanoidRootPart.Position)
+    if fuelThree then
+        adaptiveCrawlTo(fuelTwo:GetPivot().Position, humanoidRootPart, character)
+        task.wait(0.3)
+        FuelTeleport(humanoidRootPart, fuelThree)
+        task.wait(0.5)
+    end
+
+	local fuelFour = getClosestFuelPosition(humanoidRootPart.Position)
+    if fuelFour then
+        adaptiveCrawlTo(fuelTwo:GetPivot().Position, humanoidRootPart, character)
+        task.wait(0.3)
+        FuelTeleport(humanoidRootPart, fuelFour)
+        task.wait(0.5)
+    end
+
+	local fuelFive = getClosestFuelPosition(humanoidRootPart.Position)
+    if fuelFive then
+        adaptiveCrawlTo(fuelTwo:GetPivot().Position, humanoidRootPart, character)
+        task.wait(0.3)
+        FuelTeleport(humanoidRootPart, fuelFive)
+        task.wait(0.5)
+    end
+
+	local fuelSix = getClosestFuelPosition(humanoidRootPart.Position)
+    if fuelSix then
+        adaptiveCrawlTo(fuelTwo:GetPivot().Position, humanoidRootPart, character)
+        task.wait(0.3)
+        FuelTeleport(humanoidRootPart, fuelSix)
+        task.wait(0.5)
+    end
  
     -- STEP 3: OPTIMIZED POWER BOX QUERY & TRACKING (ZIP STRAIGHT TO POWER PLANT)
     print("[Step 3] Scanning for closest Power Box model...")
