@@ -1,5 +1,3 @@
-print("Loading")
-
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
@@ -48,7 +46,7 @@ local function evacuateServer(reason)
         LocalPlayer:Kick("[WARNING] UNKNOWN PLAYER DETECTED!")
     end)
  
-	-- Stops the script immediately
+    -- Stops the script immediately
     error("Script execution terminated.")
 end
  
@@ -278,60 +276,24 @@ local function runPipeline()
     print("[Pipeline] Initiating Complete Sequence...")
     task.wait(0.3)
  
-    -- STEP 1: Nearest Fuel Remote Teleport
-    local fuelOne = getClosestFuelPosition(humanoidRootPart.Position)
-    if fuelOne then
-        print("[Step 1] Moving to first closest fuel.")
-        adaptiveCrawlTo(fuelOne:GetPivot().Position, humanoidRootPart, character)
-        task.wait(0.3)
-        FuelTeleport(humanoidRootPart, fuelOne)
-        task.wait(0.5)
+    -- STEP 1-8: Kirim 8 fuel ke generator
+    for i = 1, 8 do
+        local fuel = getClosestFuelPosition(humanoidRootPart.Position)
+        if fuel then
+            print("[Step " .. i .. "] Moving to fuel #" .. i)
+            adaptiveCrawlTo(fuel:GetPivot().Position, humanoidRootPart, character)
+            task.wait(0.3)
+            FuelTeleport(humanoidRootPart, fuel)
+            excludeFuel[fuel] = true  -- biar tidak diambil lagi
+            task.wait(0.5)
+        else
+            print("[Step " .. i .. "] Tidak ada fuel lagi yang tersedia.")
+            break
+        end
     end
  
-    -- STEP 2: Second Nearest Fuel Remote Teleport
-    local fuelTwo = getClosestFuelPosition(humanoidRootPart.Position)
-    if fuelTwo then
-        print("[Step 2] Moving to second closest fuel.")
-        adaptiveCrawlTo(fuelTwo:GetPivot().Position, humanoidRootPart, character)
-        task.wait(0.3)
-        FuelTeleport(humanoidRootPart, fuelTwo)
-        task.wait(0.5)
-    end
-
-	local fuelThree = getClosestFuelPosition(humanoidRootPart.Position)
-    if fuelThree then
-        adaptiveCrawlTo(fuelTwo:GetPivot().Position, humanoidRootPart, character)
-        task.wait(0.3)
-        FuelTeleport(humanoidRootPart, fuelThree)
-        task.wait(0.5)
-    end
-
-	local fuelFour = getClosestFuelPosition(humanoidRootPart.Position)
-    if fuelFour then
-        adaptiveCrawlTo(fuelTwo:GetPivot().Position, humanoidRootPart, character)
-        task.wait(0.3)
-        FuelTeleport(humanoidRootPart, fuelFour)
-        task.wait(0.5)
-    end
-
-	local fuelFive = getClosestFuelPosition(humanoidRootPart.Position)
-    if fuelFive then
-        adaptiveCrawlTo(fuelTwo:GetPivot().Position, humanoidRootPart, character)
-        task.wait(0.3)
-        FuelTeleport(humanoidRootPart, fuelFive)
-        task.wait(0.5)
-    end
-
-	local fuelSix = getClosestFuelPosition(humanoidRootPart.Position)
-    if fuelSix then
-        adaptiveCrawlTo(fuelTwo:GetPivot().Position, humanoidRootPart, character)
-        task.wait(0.3)
-        FuelTeleport(humanoidRootPart, fuelSix)
-        task.wait(0.5)
-    end
- 
-    -- STEP 3: OPTIMIZED POWER BOX QUERY & TRACKING (ZIP STRAIGHT TO POWER PLANT)
-    print("[Step 3] Scanning for closest Power Box model...")
+    -- STEP 9: OPTIMIZED POWER BOX QUERY & TRACKING (ZIP STRAIGHT TO POWER PLANT)
+    print("[Step 9] Scanning for closest Power Box model...")
     local powerBoxData = {}
     local interactionSuccess = false
  
@@ -358,7 +320,7 @@ local function runPipeline()
         local chosenBox = powerBoxData[1].Instance
         local finalBoxTarget = powerBoxData[1].Position
  
-        print("[Step 3] Crawling directly to closest Power Box.")
+        print("[Step 9] Crawling directly to closest Power Box.")
         adaptiveCrawlTo(finalBoxTarget, humanoidRootPart, character)
         task.wait(0.5)
  
