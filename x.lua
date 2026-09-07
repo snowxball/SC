@@ -1,22 +1,25 @@
--- Errant x01 | Universal Script
+-- Errant x01 | Universal Script (Updated)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local MarketplaceService = game:GetService("MarketplaceService")
-local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local VirtualUser = game:GetService("VirtualUser")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Mouse = LocalPlayer:GetMouse()
 
 -- ====================== STATES ======================
 local infiniteJump = false
 local noclip = false
-local killAura = false
+local fullbright = false
+local clickTP = false
+local antiAFK = false
+local fpsBoost = false
 local currentSpeed = 16
 local isMinimized = false
-
-local KILL_AURA_RANGE = 50
 
 -- ====================== CHARACTER ======================
 local function getHumanoid()
@@ -53,35 +56,52 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- ====================== KILL AURA (Fixed) ======================
-RunService.Heartbeat:Connect(function()
-    if not killAura then return end
-
-    local myChar = LocalPlayer.Character
-    local myHRP = getHRP()
-    if not myHRP or not myChar then return end
-
-    for _, obj in ipairs(Workspace:GetDescendants()) do
-        if obj:IsA("Model") and obj ~= myChar then
-            local humanoid = obj:FindFirstChildOfClass("Humanoid")
-            local root = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Torso") or obj.PrimaryPart
-
-            if humanoid and root and humanoid.Health > 0 then
-                local distance = (myHRP.Position - root.Position).Magnitude
-                if distance <= KILL_AURA_RANGE then
-                    pcall(function()
-                        -- Metode 1: firetouchinterest (paling universal)
-                        firetouchinterest(myHRP, root, 0)
-                        firetouchinterest(myHRP, root, 1)
-
-                        -- Metode 2: coba damage langsung (kadang bekerja)
-                        -- humanoid:TakeDamage(10)
-                    end)
-                end
-            end
+-- Click TP
+Mouse.Button1Down:Connect(function()
+    if clickTP and UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) == false then
+        local hrp = getHRP()
+        if hrp and Mouse.Hit then
+            hrp.CFrame = CFrame.new(Mouse.Hit.Position + Vector3.new(0, 3, 0))
         end
     end
 end)
+
+-- Anti AFK
+LocalPlayer.Idled:Connect(function()
+    if antiAFK then
+        VirtualUser:CaptureController()
+        VirtualUser:ClickButton2(Vector2.new())
+    end
+end)
+
+-- Fullbright
+local function toggleFullbright(state)
+    fullbright = state
+    if state then
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = false
+        Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+    else
+        -- Kembalikan ke default (kurang sempurna, tapi cukup)
+        Lighting.Brightness = 1
+        Lighting.ClockTime = 14
+        Lighting.FogEnd = 1000
+        Lighting.GlobalShadows = true
+    end
+end
+
+-- FPS Boost
+local function toggleFPSBoost(state)
+    fpsBoost = state
+    if state then
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        UserSettings():GetService("UserGameSettings").SavedQualityLevel = Enum.SavedQualitySetting.QualityLevel1
+    else
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+    end
+end
 
 -- Speed
 local function applySpeed(speed)
@@ -108,8 +128,8 @@ screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = PlayerGui
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 300, 0, 360)
-main.Position = UDim2.new(0.5, -150, 0.5, -180)
+main.Size = UDim2.new(0, 300, 0, 420)
+main.Position = UDim2.new(0.5, -150, 0.5, -210)
 main.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
 main.BorderSizePixel = 0
 main.Active = true
@@ -186,7 +206,7 @@ content.BorderSizePixel = 0
 content.Parent = main
 
 local layout = Instance.new("UIListLayout")
-layout.Padding = UDim.new(0, 8)
+layout.Padding = UDim.new(0, 7)
 layout.Parent = content
 
 local function updateCanvas()
@@ -197,7 +217,7 @@ end
 
 local function addToggle(name, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 34)
+    btn.Size = UDim2.new(1, 0, 0, 32)
     btn.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
     btn.Text = name .. "  :  OFF"
     btn.TextColor3 = Color3.fromRGB(230, 230, 230)
@@ -216,14 +236,17 @@ local function addToggle(name, callback)
     updateCanvas()
 end
 
--- ===== UI =====
+-- ===== UI BUILD =====
 addToggle("Infinity Jump", function(v) infiniteJump = v end)
 addToggle("No Clip", function(v) noclip = v end)
-addToggle("Kill Aura", function(v) killAura = v end)
+addToggle("Fullbright", function(v) toggleFullbright(v) end)
+addToggle("Click TP", function(v) clickTP = v end)
+addToggle("Anti AFK", function(v) antiAFK = v end)
+addToggle("FPS Boost", function(v) toggleFPSBoost(v) end)
 
--- Speed Buttons
+-- Speed
 local speedHolder = Instance.new("Frame")
-speedHolder.Size = UDim2.new(1, 0, 0, 34)
+speedHolder.Size = UDim2.new(1, 0, 0, 32)
 speedHolder.BackgroundTransparency = 1
 speedHolder.Parent = content
 
@@ -308,7 +331,7 @@ UserInputService.InputChanged:Connect(function(input)
     if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - rStart
         local newX = math.clamp(rSize.X.Offset + delta.X, 260, 420)
-        local newY = math.clamp(rSize.Y.Offset + delta.Y, 280, 500)
+        local newY = math.clamp(rSize.Y.Offset + delta.Y, 280, 520)
         main.Size = UDim2.new(0, newX, 0, newY)
     end
 end)
