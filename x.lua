@@ -1,9 +1,10 @@
--- Errant x01 | Universal Script (with Kill Aura)
+-- Errant x01 | Universal Script
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local MarketplaceService = game:GetService("MarketplaceService")
+local Workspace = game:GetService("Workspace")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -14,9 +15,8 @@ local noclip = false
 local killAura = false
 local currentSpeed = 16
 local isMinimized = false
-local showingPlayerList = false
 
-local KILL_AURA_RANGE = 50 -- jarak kill aura
+local KILL_AURA_RANGE = 50
 
 -- ====================== CHARACTER ======================
 local function getHumanoid()
@@ -53,25 +53,29 @@ RunService.Stepped:Connect(function()
     end
 end)
 
--- Kill Aura
+-- ====================== KILL AURA (Fixed) ======================
 RunService.Heartbeat:Connect(function()
     if not killAura then return end
 
+    local myChar = LocalPlayer.Character
     local myHRP = getHRP()
-    if not myHRP then return end
+    if not myHRP or not myChar then return end
 
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            local targetHRP = player.Character:FindFirstChild("HumanoidRootPart")
-            local targetHum = player.Character:FindFirstChildOfClass("Humanoid")
+    for _, obj in ipairs(Workspace:GetDescendants()) do
+        if obj:IsA("Model") and obj ~= myChar then
+            local humanoid = obj:FindFirstChildOfClass("Humanoid")
+            local root = obj:FindFirstChild("HumanoidRootPart") or obj:FindFirstChild("Torso") or obj.PrimaryPart
 
-            if targetHRP and targetHum and targetHum.Health > 0 then
-                local distance = (myHRP.Position - targetHRP.Position).Magnitude
+            if humanoid and root and humanoid.Health > 0 then
+                local distance = (myHRP.Position - root.Position).Magnitude
                 if distance <= KILL_AURA_RANGE then
                     pcall(function()
-                        -- Metode universal yang paling sering bekerja
-                        firetouchinterest(myHRP, targetHRP, 0)
-                        firetouchinterest(myHRP, targetHRP, 1)
+                        -- Metode 1: firetouchinterest (paling universal)
+                        firetouchinterest(myHRP, root, 0)
+                        firetouchinterest(myHRP, root, 1)
+
+                        -- Metode 2: coba damage langsung (kadang bekerja)
+                        -- humanoid:TakeDamage(10)
                     end)
                 end
             end
@@ -104,8 +108,8 @@ screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = PlayerGui
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 300, 0, 430)
-main.Position = UDim2.new(0.5, -150, 0.5, -215)
+main.Size = UDim2.new(0, 300, 0, 360)
+main.Position = UDim2.new(0.5, -150, 0.5, -180)
 main.BackgroundColor3 = Color3.fromRGB(16, 16, 20)
 main.BorderSizePixel = 0
 main.Active = true
@@ -187,21 +191,8 @@ layout.Parent = content
 
 local function updateCanvas()
     task.defer(function()
-        content.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 15)
+        content.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 12)
     end)
-end
-
-local function addSection(text)
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, 0, 0, 18)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = text
-    lbl.TextColor3 = Color3.fromRGB(130, 130, 145)
-    lbl.Font = Enum.Font.GothamBold
-    lbl.TextSize = 12
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Parent = content
-    updateCanvas()
 end
 
 local function addToggle(name, callback)
@@ -225,25 +216,12 @@ local function addToggle(name, callback)
     updateCanvas()
 end
 
-local function addButton(text, bgColor, callback)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, 34)
-    btn.BackgroundColor3 = bgColor
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(240, 240, 240)
-    btn.Font = Enum.Font.Gotham
-    btn.TextSize = 13
-    btn.Parent = content
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
-    btn.MouseButton1Click:Connect(callback)
-    updateCanvas()
-    return btn
-end
-
--- ===== UI BUILD =====
+-- ===== UI =====
 addToggle("Infinity Jump", function(v) infiniteJump = v end)
 addToggle("No Clip", function(v) noclip = v end)
+addToggle("Kill Aura", function(v) killAura = v end)
 
+-- Speed Buttons
 local speedHolder = Instance.new("Frame")
 speedHolder.Size = UDim2.new(1, 0, 0, 34)
 speedHolder.BackgroundTransparency = 1
@@ -280,97 +258,6 @@ createSpeedButton("OFF", 16)
 createSpeedButton("50", 50)
 createSpeedButton("100", 100)
 updateCanvas()
-
-addToggle("Kill Aura", function(v) killAura = v end)
-
-addButton("Teleport to Player", Color3.fromRGB(45, 75, 140), function()
-    showingPlayerList = not showingPlayerList
-    playerList.Visible = showingPlayerList
-    if showingPlayerList then
-        refreshPlayers()
-    end
-end)
-
--- ===== PLAYER LIST =====
-local playerList = Instance.new("Frame")
-playerList.Size = UDim2.new(0, 190, 0, 280)
-playerList.Position = UDim2.new(1, 10, 0, 0)
-playerList.BackgroundColor3 = Color3.fromRGB(20, 20, 26)
-playerList.BorderSizePixel = 0
-playerList.Visible = false
-playerList.Parent = main
-Instance.new("UICorner", playerList).CornerRadius = UDim.new(0, 8)
-
-local plTitle = Instance.new("TextLabel")
-plTitle.Size = UDim2.new(1, 0, 0, 32)
-plTitle.BackgroundColor3 = Color3.fromRGB(32, 32, 40)
-plTitle.Text = "Select Player"
-plTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-plTitle.Font = Enum.Font.GothamBold
-plTitle.TextSize = 13
-plTitle.Parent = playerList
-Instance.new("UICorner", plTitle).CornerRadius = UDim.new(0, 8)
-
-local plScroll = Instance.new("ScrollingFrame")
-plScroll.Size = UDim2.new(1, -10, 1, -75)
-plScroll.Position = UDim2.new(0, 5, 0, 36)
-plScroll.BackgroundTransparency = 1
-plScroll.ScrollBarThickness = 3
-plScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-plScroll.Parent = playerList
-
-local plLayout = Instance.new("UIListLayout")
-plLayout.Padding = UDim.new(0, 4)
-plLayout.Parent = plScroll
-
-local cancelBtn = Instance.new("TextButton")
-cancelBtn.Size = UDim2.new(1, -10, 0, 30)
-cancelBtn.Position = UDim2.new(0, 5, 1, -36)
-cancelBtn.BackgroundColor3 = Color3.fromRGB(150, 45, 45)
-cancelBtn.Text = "Cancel"
-cancelBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-cancelBtn.Font = Enum.Font.GothamBold
-cancelBtn.TextSize = 13
-cancelBtn.Parent = playerList
-Instance.new("UICorner", cancelBtn).CornerRadius = UDim.new(0, 6)
-
-cancelBtn.MouseButton1Click:Connect(function()
-    showingPlayerList = false
-    playerList.Visible = false
-end)
-
-function refreshPlayers()
-    for _, child in ipairs(plScroll:GetChildren()) do
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
-    end
-
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(1, 0, 0, 28)
-            btn.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-            btn.Text = plr.Name
-            btn.TextColor3 = Color3.fromRGB(230, 230, 230)
-            btn.Font = Enum.Font.Gotham
-            btn.TextSize = 12
-            btn.Parent = plScroll
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
-
-            btn.MouseButton1Click:Connect(function()
-                local targetHRP = plr.Character and plr.Character:FindFirstChild("HumanoidRootPart")
-                local myHRP = getHRP()
-                if targetHRP and myHRP then
-                    myHRP.CFrame = targetHRP.CFrame + Vector3.new(0, 0, 3)
-                end
-                showingPlayerList = false
-                playerList.Visible = false
-            end)
-        end
-    end
-    plScroll.CanvasSize = UDim2.new(0, 0, 0, plLayout.AbsoluteContentSize.Y + 8)
-end
 
 -- ====================== DRAG ======================
 local dragging, dragStart, startPos
@@ -420,8 +307,8 @@ end)
 UserInputService.InputChanged:Connect(function(input)
     if resizing and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - rStart
-        local newX = math.clamp(rSize.X.Offset + delta.X, 260, 450)
-        local newY = math.clamp(rSize.Y.Offset + delta.Y, 300, 580)
+        local newX = math.clamp(rSize.X.Offset + delta.X, 260, 420)
+        local newY = math.clamp(rSize.Y.Offset + delta.Y, 280, 500)
         main.Size = UDim2.new(0, newX, 0, newY)
     end
 end)
@@ -432,7 +319,6 @@ minBtn.MouseButton1Click:Connect(function()
     isMinimized = not isMinimized
     if isMinimized then
         content.Visible = false
-        playerList.Visible = false
         main.Size = UDim2.new(0, main.Size.X.Offset, 0, 56)
         minBtn.Text = "+"
     else
