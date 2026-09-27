@@ -1,5 +1,5 @@
 --[[
-    Free Cam + GUI On/Off + Tombol Gerak di GUI
+    Free Cam + GUI On/Off + Tombol Gerak di GUI + Tombol Close
 ]]
 
 local cam = workspace.CurrentCamera
@@ -125,18 +125,39 @@ Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
 
 -- Title
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 28)
+title.Size = UDim2.new(1, -40, 0, 28)
+title.Position = UDim2.new(0, 10, 0, 0)
 title.BackgroundTransparency = 1
 title.Text = "Errant x FreeCam"
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 15
+title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = main
+
+-- Close Button (X)
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 26, 0, 26)
+closeBtn.Position = UDim2.new(1, -32, 0, 6)
+closeBtn.BackgroundColor3 = Color3.fromRGB(190, 45, 45)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 14
+closeBtn.Parent = main
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+closeBtn.MouseButton1Click:Connect(function()
+    -- Matikan Free Cam dulu
+    setFreeCam(false)
+    -- Hapus GUI
+    screenGui:Destroy()
+end)
 
 -- Toggle Button
 local toggleBtn = Instance.new("TextButton")
 toggleBtn.Size = UDim2.new(0.85, 0, 0, 28)
-toggleBtn.Position = UDim2.new(0.075, 0, 0, 32)
+toggleBtn.Position = UDim2.new(0.075, 0, 0, 36)
 toggleBtn.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
 toggleBtn.Text = "OFF"
 toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -161,7 +182,7 @@ end)
 -- Movement Buttons Container
 local moveFrame = Instance.new("Frame")
 moveFrame.Size = UDim2.new(0, 140, 0, 110)
-moveFrame.Position = UDim2.new(0.5, -70, 0, 75)
+moveFrame.Position = UDim2.new(0.5, -70, 0, 80)
 moveFrame.BackgroundTransparency = 1
 moveFrame.Parent = main
 
@@ -201,28 +222,28 @@ local function createMoveButton(text, position, onPress, onRelease)
     return btn
 end
 
--- Tombol Maju (I)
+-- Tombol Maju
 createMoveButton("▲", UDim2.new(0.5, -21, 0, 0), function()
     moveForward = true
 end, function()
     moveForward = false
 end)
 
--- Tombol Kiri (J)
+-- Tombol Kiri
 createMoveButton("◀", UDim2.new(0, 0, 0, 48), function()
     moveLeft = true
 end, function()
     moveLeft = false
 end)
 
--- Tombol Mundur (K)
+-- Tombol Mundur
 createMoveButton("▼", UDim2.new(0.5, -21, 0, 48), function()
     moveBackward = true
 end, function()
     moveBackward = false
 end)
 
--- Tombol Kanan (L)
+-- Tombol Kanan
 createMoveButton("▶", UDim2.new(1, -42, 0, 48), function()
     moveRight = true
 end, function()
@@ -251,4 +272,4 @@ UIS.InputChanged:Connect(function(input)
     end
 end)
 
-print("Free Cam + GUI Buttons loaded!")
+print("Free Cam loaded!")
