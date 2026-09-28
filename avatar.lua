@@ -1,11 +1,10 @@
 --[[
-    Errant x Avatar Changer
+    Errant x Avatar Changer (Visual Only) - Fixed Version
 ]]
 
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local InsertService = game:GetService("InsertService")
-local RunService = game:GetService("RunService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -16,35 +15,85 @@ local function getCharacter()
     return LocalPlayer.Character
 end
 
-local function getHumanoid()
-    local char = getCharacter()
-    return char and char:FindFirstChildOfClass("Humanoid")
-end
+local function clearAvatar(character)
+    if not character then return end
 
--- Copy Avatar dari player lain (Visual Only)
-local function copyAvatar(targetPlayer)
-    local targetChar = targetPlayer.Character
-    if not targetChar then return end
-
-    local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
-    local myHum = getHumanoid()
-    if not targetHum or not myHum then return end
-
-    local success, description = pcall(function()
-        return targetHum:GetAppliedDescription()
-    end)
-
-    if success and description then
-        pcall(function()
-            myHum:ApplyDescription(description)
-        end)
-        print("Berhasil copy avatar dari:", targetPlayer.Name)
-    else
-        warn("Gagal mengambil description dari", targetPlayer.Name)
+    -- Hapus semua accessory
+    for _, item in ipairs(character:GetChildren()) do
+        if item:IsA("Accessory") or item:IsA("Hat") then
+            item:Destroy()
+        end
     end
+
+    -- Hapus clothing
+    local shirt = character:FindFirstChildOfClass("Shirt")
+    local pants = character:FindFirstChildOfClass("Pants")
+    local tshirt = character:FindFirstChildOfClass("ShirtGraphic")
+    if shirt then shirt:Destroy() end
+    if pants then pants:Destroy() end
+    if tshirt then tshirt:Destroy() end
 end
 
--- Tambah Item menggunakan Asset ID
+-- Copy Avatar secara manual (lebih reliable)
+local function copyAvatar(targetPlayer)
+    local myChar = getCharacter()
+    local targetChar = targetPlayer.Character
+
+    if not myChar or not targetChar then
+        warn("Character tidak ditemukan")
+        return
+    end
+
+    local myHum = myChar:FindFirstChildOfClass("Humanoid")
+    local targetHum = targetChar:FindFirstChildOfClass("Humanoid")
+    if not myHum or not targetHum then return end
+
+    -- 1. Clear dulu
+    clearAvatar(myChar)
+
+    -- 2. Copy BodyColors
+    local targetColors = targetChar:FindFirstChildOfClass("BodyColors")
+    if targetColors then
+        local oldColors = myChar:FindFirstChildOfClass("BodyColors")
+        if oldColors then oldColors:Destroy() end
+        targetColors:Clone().Parent = myChar
+    end
+
+    -- 3. Copy Shirt
+    local targetShirt = targetChar:FindFirstChildOfClass("Shirt")
+    if targetShirt then
+        targetShirt:Clone().Parent = myChar
+    end
+
+    -- 4. Copy Pants
+    local targetPants = targetChar:FindFirstChildOfClass("Pants")
+    if targetPants then
+        targetPants:Clone().Parent = myChar
+    end
+
+    -- 5. Copy T-Shirt
+    local targetTShirt = targetChar:FindFirstChildOfClass("ShirtGraphic")
+    if targetTShirt then
+        targetTShirt:Clone().Parent = myChar
+    end
+
+    -- 6. Copy semua Accessory
+    for _, item in ipairs(targetChar:GetChildren()) do
+        if item:IsA("Accessory") or item:IsA("Hat") then
+            local clone = item:Clone()
+            clone.Parent = myChar
+
+            -- Pastikan Accessory sudah terpasang dengan benar
+            pcall(function()
+                myHum:AddAccessory(clone)
+            end)
+        end
+    end
+
+    print("Berhasil copy avatar dari:", targetPlayer.Name)
+end
+
+-- Tambah Item by Asset ID
 local function addItemById(assetId)
     assetId = tonumber(assetId)
     if not assetId then
@@ -53,41 +102,40 @@ local function addItemById(assetId)
     end
 
     local char = getCharacter()
-    local hum = getHumanoid()
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
     if not char or not hum then return end
 
-    local success, model = pcall(function()
+    local success, asset = pcall(function()
         return InsertService:LoadAsset(assetId)
     end)
 
-    if not success or not model then
-        warn("Gagal load asset ID:", assetId)
-        return
-    end
+    if success and asset then
+        local item = asset:FindFirstChildOfClass("Accessory")
+            or asset:FindFirstChildOfClass("Hat")
+            or asset:FindFirstChildOfClass("Shirt")
+            or asset:FindFirstChildOfClass("Pants")
+            or asset:FindFirstChildOfClass("ShirtGraphic")
+            or asset:GetChildren()[1]
 
-    -- Cari Accessory / Clothing di dalam model
-    local item = model:FindFirstChildOfClass("Accessory")
-        or model:FindFirstChildOfClass("Shirt")
-        or model:FindFirstChildOfClass("Pants")
-        or model:FindFirstChildOfClass("ShirtGraphic")
-        or model:FindFirstChildWhichIsA("Accessory")
-        or model:GetChildren()[1]
+        if item then
+            local clone = item:Clone()
+            clone.Parent = char
 
-    if item then
-        item.Parent = char
-        print("Berhasil menambahkan item ID:", assetId)
+            if clone:IsA("Accessory") or clone:IsA("Hat") then
+                pcall(function()
+                    hum:AddAccessory(clone)
+                end)
+            end
+
+            print("Berhasil menambahkan item:", assetId)
+        else
+            warn("Tidak menemukan item di dalam asset")
+        end
+
+        asset:Destroy()
     else
-        -- Coba terapkan lewat HumanoidDescription
-        pcall(function()
-            local desc = hum:GetAppliedDescription()
-            -- Kita coba tambahkan sebagai accessory
-            local newDesc = desc:Clone()
-            -- Karena visual only, kita langsung parent saja
-        end)
-        warn("Item tidak dikenali sebagai Accessory/Clothing")
+        warn("Gagal load Asset ID:", assetId)
     end
-
-    model:Destroy()
 end
 
 -- ====================== GUI ======================
@@ -97,8 +145,8 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = PlayerGui
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 280, 0, 380)
-main.Position = UDim2.new(0.5, -140, 0.5, -190)
+main.Size = UDim2.new(0, 280, 0, 390)
+main.Position = UDim2.new(0.5, -140, 0.5, -195)
 main.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 main.BorderSizePixel = 0
 main.Active = true
@@ -124,7 +172,6 @@ title.TextSize = 15
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
--- Close Button
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 26, 0, 26)
 closeBtn.Position = UDim2.new(1, -31, 0, 5)
@@ -147,7 +194,7 @@ content.Position = UDim2.new(0, 10, 0, 42)
 content.BackgroundTransparency = 1
 content.Parent = main
 
--- Section: Copy Avatar
+-- Copy Section
 local copyLabel = Instance.new("TextLabel")
 copyLabel.Size = UDim2.new(1, 0, 0, 20)
 copyLabel.BackgroundTransparency = 1
@@ -159,7 +206,7 @@ copyLabel.TextXAlignment = Enum.TextXAlignment.Left
 copyLabel.Parent = content
 
 local playerScroll = Instance.new("ScrollingFrame")
-playerScroll.Size = UDim2.new(1, 0, 0, 160)
+playerScroll.Size = UDim2.new(1, 0, 0, 165)
 playerScroll.Position = UDim2.new(0, 0, 0, 24)
 playerScroll.BackgroundColor3 = Color3.fromRGB(28, 28, 34)
 playerScroll.BorderSizePixel = 0
@@ -204,7 +251,7 @@ refreshPlayerList()
 Players.PlayerAdded:Connect(refreshPlayerList)
 Players.PlayerRemoving:Connect(refreshPlayerList)
 
--- Section: Add Item by ID
+-- Add Item Section
 local addLabel = Instance.new("TextLabel")
 addLabel.Size = UDim2.new(1, 0, 0, 20)
 addLabel.Position = UDim2.new(0, 0, 0, 200)
@@ -226,7 +273,6 @@ idBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 idBox.PlaceholderColor3 = Color3.fromRGB(140, 140, 150)
 idBox.Font = Enum.Font.Gotham
 idBox.TextSize = 13
-idBox.ClearTextOnFocus = false
 idBox.Parent = content
 Instance.new("UICorner", idBox).CornerRadius = UDim.new(0, 6)
 
@@ -242,14 +288,12 @@ addBtn.Parent = content
 Instance.new("UICorner", addBtn).CornerRadius = UDim.new(0, 6)
 
 addBtn.MouseButton1Click:Connect(function()
-    local id = idBox.Text
-    if id and id ~= "" then
-        addItemById(id)
+    if idBox.Text ~= "" then
+        addItemById(idBox.Text)
         idBox.Text = ""
     end
 end)
 
--- Refresh Button
 local refreshBtn = Instance.new("TextButton")
 refreshBtn.Size = UDim2.new(1, 0, 0, 28)
 refreshBtn.Position = UDim2.new(0, 0, 0, 308)
@@ -260,10 +304,9 @@ refreshBtn.Font = Enum.Font.Gotham
 refreshBtn.TextSize = 12
 refreshBtn.Parent = content
 Instance.new("UICorner", refreshBtn).CornerRadius = UDim.new(0, 6)
-
 refreshBtn.MouseButton1Click:Connect(refreshPlayerList)
 
--- ====================== DRAG ======================
+-- Drag
 local dragging, dragStart, startPos
 titleBar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -285,4 +328,4 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
-print("Avatar Changer loaded!")
+print("Avatar Changer Fixed loaded!")
